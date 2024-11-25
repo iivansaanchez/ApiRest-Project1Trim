@@ -30,18 +30,22 @@ public class ProjectDTO {
         this.status = project.getStatus().getName();
 
         //Convertimos la lista de Developers a DevelopersDTO
-        for(Developers d : project.getListDevelopers()){
-            //Creamos un DevelopersDTO apartir de cada Developer
-            DevelopersDTO developersDTO = new DevelopersDTO(d);
-            //Lo añadimos a la lista de DevelopersDTO
-            this.listDevelopers.add(developersDTO);
+        if(project.getListDevelopers() != null && project.getListDevelopers().size() > 0){
+            for(Developers d : project.getListDevelopers()){
+                //Creamos un DevelopersDTO apartir de cada Developer
+                DevelopersDTO developersDTO = new DevelopersDTO(d);
+                //Lo añadimos a la lista de DevelopersDTO
+                this.listDevelopers.add(developersDTO);
+            }
+        }
+        if(project.getListTechnologies() != null && project.getListTechnologies().size() > 0){
+            //Ahora lo mismo pero con listTechonologies
+            for(Technologies t : project.getListTechnologies()){
+                TechnologiesDTO technologiesDTO = new TechnologiesDTO(t);
+                this.listTechnologies.add(technologiesDTO);
+            }
         }
 
-        //Ahora lo mismo pero con listTechonologies
-        for(Technologies t : project.getListTechnologies()){
-            TechnologiesDTO technologiesDTO = new TechnologiesDTO(t);
-            this.listTechnologies.add(technologiesDTO);
-        }
     }
     
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +16,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,26 +35,40 @@ public class Project implements Serializable{
     @Column(name = "project_id")
     private Integer id;
     
-    @Column(name="project_name")
+    /*
+    Para las validaciones de esta clase vamos a usar las siguientes anotaciones que nos ofrece hibernate:
+    - @NotNull --> Evita que el atributo sea nulo y en caso de serlo muestra un mensaje definido
+    - @NotEmpty --> Evita que el atributo este vacío en caso de serlo muestra un mensaje definido
+    - @Size --> Este atributo se suele usar para las cadenas para que tener un control sobre sus caracteres
+    - @Pattern --> En este caso usamos pattern para validar la url con una expresion regular que controlar,
+        que la URL empiece por http, https o ftp, siga con :// y luego cualquier cosa
+    */
+
+    @NotNull(message = "Project name cannot be null")
+    @NotEmpty(message = "Project name cannot be empty")
+    @Size(max = 100, message = "Project name must not exceed 100 characters")
+    @Column(name = "project_name")
     private String name;
 
-    @Column(name="description")
+    @Size(max = 255, message = "Description must not exceed 255 characters")
+    @Column(name = "description")
     private String description;
 
-    @Column(name="start_date")
+    @Column(name = "start_date")
     private Date startDate;
 
-    @Column(name="end_date")
+    @Column(name = "end_date")
     private Date endDate;
 
-    @Column(name="repository_url")
+    @Column(name = "repository_url")
     private String repositoryUrl;
 
-    @Column(name="demo_url")
+    @Column(name = "demo_url")
     private String demoUrl;
 
-    @Column(name="picture")
+    @Column(name = "picture")
     private String picture;
+
 
     @ManyToOne
     @JoinColumn(name="status_status_id", nullable = true)

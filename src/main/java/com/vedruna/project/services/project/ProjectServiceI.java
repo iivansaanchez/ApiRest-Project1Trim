@@ -1,6 +1,8 @@
 package com.vedruna.project.services.project;
 
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
 
@@ -12,10 +14,10 @@ public interface ProjectServiceI {
     //Aqui haremos todos las funciones necesarias con projects que son las siguientes:
 
     //Funcion obtener todos los projects pero paginados
-    Page<ProjectDTO> findAllProject(Integer numPage, Integer pageSize) throws Exception;
+    Page<ProjectDTO> findAllProject(Integer numPage, Integer pageSize);
 
     //Función para extrar un proyecto por una palabra contenida
-    Project showProjectByName(String name);
+    List<ProjectDTO> showProjectByName(String name);
 
     //Función para añadir project
     void saveProject(Project project);
