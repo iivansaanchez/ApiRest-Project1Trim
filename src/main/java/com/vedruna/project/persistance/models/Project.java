@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
+import com.vedruna.project.validation.ValidUrl;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +17,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -54,15 +56,18 @@ public class Project implements Serializable{
     @Column(name = "description")
     private String description;
 
+    @FutureOrPresent(message = "Start date must be today or in the future")
     @Column(name = "start_date")
     private Date startDate;
 
     @Column(name = "end_date")
     private Date endDate;
 
+    @ValidUrl(message = "The repository URL is not valid. Please provide a valid URL starting with http, https, or ftp.")
     @Column(name = "repository_url")
     private String repositoryUrl;
 
+    @ValidUrl(message = "The demo URL is not valid. Please provide a valid URL starting with http, https, or ftp.")
     @Column(name = "demo_url")
     private String demoUrl;
 

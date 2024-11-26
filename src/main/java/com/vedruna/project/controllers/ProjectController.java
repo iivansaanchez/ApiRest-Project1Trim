@@ -97,12 +97,12 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}")
-    public void updateProject(@PathVariable Integer id, @Valid @RequestBody Project project){
+    public void updateProject(@PathVariable String id, @Valid @RequestBody Project project){
         projectServiceI.updateProject(id, project);
     }
 
     @DeleteMapping("/projects/{id}")
-    public void deleteProject(@PathVariable Integer id){
+    public void deleteProject(@PathVariable String id){
         projectServiceI.deleteProduct(id);
     }
 }
