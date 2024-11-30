@@ -23,8 +23,8 @@ public interface ProjectServiceI {
     void saveProject(Project project);
 
     //Función editar project
-    void updateProject(Integer id, Project project);
+    void updateProject(String id, Project project);
 
     //Función borrar project por su id
-    void deleteProduct(Integer id);
+    void deleteProduct(String id);
 }

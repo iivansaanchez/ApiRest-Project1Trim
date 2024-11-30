@@ -92,15 +92,27 @@ public class ProjectServiceImp implements ProjectServiceI {
     }
 
     @Override
-    public void updateProject(Integer id, @Validated Project project) {
-    // Validación del ID
-    if (id == null || id <= 0) {
-        throw new ExceptionValueNotRight("Invalid ID for project update");
-    }
+    public void updateProject(String id, @Validated Project project) {
+        // Validación inicial de id
+        if (id == null || id.trim().isEmpty()) {
+            throw new ExceptionValueNotRight("Id cannot be null or empty");
+        }
+    
+        int idValid;
+        try {
+            idValid = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            throw new ExceptionValueNotRight("Id must be a valid integer");
+        }
+    
+        // Validación de id negativo o cero
+        if (idValid <= 0) {
+            throw new ExceptionValueNotRight("Id cannot be negative or zero");
+        }
 
     // Buscar el proyecto existente por ID
-    Project existingProject = projectRepository.findById(id)
-        .orElseThrow(() -> new ExceptionElementNotFound(id)); // Si no se encuentra, lanzar una excepción
+    Project existingProject = projectRepository.findById(idValid)
+        .orElseThrow(() -> new ExceptionElementNotFound(idValid)); // Si no se encuentra, lanzar una excepción
 
     // Actualizar solo los campos proporcionados (si no son null)
     if (project.getName() != null) {
@@ -139,15 +151,30 @@ public class ProjectServiceImp implements ProjectServiceI {
      * @param id El ID del proyecto que se desea eliminar.
      */
     @Override
-    public void deleteProduct(Integer id) {
-        if (id == null || id <= 0) {
-            throw new ExceptionValueNotRight("Invalid ID for project delete");
+    public void deleteProduct(String id) {
+    
+        // Validación inicial de id
+        if (id == null || id.trim().isEmpty()) {
+            throw new ExceptionValueNotRight("Id cannot be null or empty");
         }
-
-        Project existingProject = projectRepository.findById(id)
-        .orElseThrow(() -> new ExceptionElementNotFound(id));
-
+    
+        int idValid;
+        try {
+            idValid = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            throw new ExceptionValueNotRight("Id must be a valid integer");
+        }
+    
+        // Validación de id negativo o cero
+        if (idValid <= 0) {
+            throw new ExceptionValueNotRight("Id cannot be negative or zero");
+        }
+    
+        // Verificar si el proyecto existe
+        Project existingProject = projectRepository.findById(idValid)
+                .orElseThrow(() -> new ExceptionElementNotFound(idValid));
+    
+        // Eliminar el proyecto si existe
         projectRepository.deleteById(existingProject.getId());
     }
-
 }

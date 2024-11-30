@@ -10,6 +10,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +28,10 @@ public class Technologies implements Serializable{
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     @Column(name="tech_id")
     private Integer id;
-
+        
+    @NotNull(message = "Technologies name cannot be null")
+    @NotEmpty(message = "Technologies name cannot be empty")
+    @Size(max = 30, message = "Technologies name must not exceed 30 characters")
     @Column(name="tech_name")
     private String name;
 
