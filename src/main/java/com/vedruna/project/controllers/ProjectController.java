@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,11 +20,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vedruna.project.dto.GenericDTO;
 import com.vedruna.project.dto.ProjectDTO;
+import com.vedruna.project.exception.ExceptionElementNotFound;
 import com.vedruna.project.exception.ExceptionPageNotFound;
 import com.vedruna.project.exception.ExceptionValueNotRight;
 import com.vedruna.project.persistance.models.Project;
 import com.vedruna.project.persistance.models.Status;
+import com.vedruna.project.persistance.repository.ProjectRepository;
 import com.vedruna.project.persistance.repository.StatusRepository;
 import com.vedruna.project.services.project.ProjectServiceI;
 
@@ -35,6 +39,9 @@ public class ProjectController {
 
     @Autowired
     ProjectServiceI projectServiceI;
+
+    @Autowired
+    ProjectRepository projectRepository;
 
     @Autowired
     StatusRepository statusRepository;
@@ -74,7 +81,7 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
-    public ResponseEntity<ProjectDTO> createProject(@Valid @RequestBody Project project, BindingResult br){
+    public ResponseEntity<GenericDTO<ProjectDTO>> createProject(@Valid @RequestBody Project project, BindingResult br){
 	    if(br.hasErrors()) {
 	    	throw new ExceptionValueNotRight(br.getAllErrors().get(0).getDefaultMessage());
 	    }
@@ -85,24 +92,118 @@ public class ProjectController {
 
         //Ahora vamos a asingarle una fecha de inicio que se marcara por el dia de hoy
         project.setStartDate(new Date(System.currentTimeMillis()));
-
-        // Persistimos el proyecto
-        projectServiceI.saveProject(project);
+        try {
+            // Persistimos el proyecto
+            projectServiceI.saveProject(project);
+        
+            // Convertimos el proyecto guardado en un DTO
+            ProjectDTO projectDTO = new ProjectDTO(project);
     
-        // Convertimos el proyecto guardado en un DTO
-        ProjectDTO projectDTO = new ProjectDTO(project);
-    
-        // Retornamos la respuesta con un estado HTTP 201 (Created)
-        return ResponseEntity.status(HttpStatus.CREATED).body(projectDTO);
+            //Creamos el GenericDTO
+            GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Added successfully", projectDTO);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(genericDTO);
+        } catch (Exception e) {
+            // Si ocurre una excepción relacionada con valores no válidos
+            throw new ExceptionValueNotRight("An unexpected error occurred while creating the project: " + e.getMessage());
+        }
     }
 
     @PutMapping("/projects/{id}")
-    public void updateProject(@PathVariable String id, @Valid @RequestBody Project project){
-        projectServiceI.updateProject(id, project);
+    public ResponseEntity<GenericDTO<ProjectDTO>> updateProject(@PathVariable String id, @Valid @RequestBody Project project, BindingResult br){
+        if(br.hasErrors()) {
+	    	throw new ExceptionValueNotRight(br.getAllErrors().get(0).getDefaultMessage());
+	    }
+
+        // Validación inicial de id
+        if (id == null || id.trim().isEmpty()) {
+            throw new ExceptionValueNotRight("Id cannot be null or empty");
+        }
+    
+        int idValid;
+        try {
+            idValid = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            throw new ExceptionValueNotRight("Id must be a valid integer");
+        }
+    
+        // Validación de id negativo o cero
+        if (idValid <= 0) {
+            throw new ExceptionValueNotRight("Id cannot be negative or zero");
+        }
+    
+        // Verificar si el desarrollador existe
+        Project existingProject = projectRepository.findById(idValid)
+                .orElseThrow(() -> new ExceptionElementNotFound(idValid));
+        try {
+            project.setStatus(existingProject.getStatus());
+            //Una vez validado lo pasamos a projectDTO
+            ProjectDTO projectDTO = new ProjectDTO(project);
+            //Creamos un GenericDTO
+            GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Update successfully", projectDTO);
+            //Updateamos el project
+            projectServiceI.updateProject(id, project);
+            //Por ultimo devolvemos en forma de respuesta el genericDTO
+            return ResponseEntity.status(HttpStatus.CREATED).body(genericDTO);
+        } catch (Exception e) {
+            // Si ocurre una excepción relacionada con valores no válidos
+            throw new ExceptionValueNotRight("An unexpected error occurred while updating the project: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/projects/{id}")
-    public void deleteProject(@PathVariable String id){
-        projectServiceI.deleteProduct(id);
+    public ResponseEntity<GenericDTO<ProjectDTO>> deleteProject(@PathVariable String id){
+        // Validación inicial de id
+        if (id == null || id.trim().isEmpty()) {
+            throw new ExceptionValueNotRight("Id cannot be null or empty");
+        }
+    
+        int idValid;
+        try {
+            idValid = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            throw new ExceptionValueNotRight("Id must be a valid integer");
+        }
+    
+        // Validación de id negativo o cero
+        if (idValid <= 0) {
+            throw new ExceptionValueNotRight("Id cannot be negative or zero");
+        }
+
+        //Verificar si la technologia existe
+        Project existingProject = projectRepository.findById(idValid)
+        .orElseThrow(() -> new ExceptionElementNotFound(idValid));
+
+        //Creamos el DTO
+        ProjectDTO projectDTO = new ProjectDTO(existingProject);
+
+        //Creamos el generico
+        GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Delete successfully", projectDTO);
+
+        //Lo eliminamos una vez que ya se ha validado todo
+        projectServiceI.deleteProject(idValid);
+
+        //Devolvemos un mensaje de aceptado con el objeto que hemos borrado
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(genericDTO);
+    }
+
+    @PatchMapping("/projects/totesting/{id}")
+    public ResponseEntity<GenericDTO<ProjectDTO>> developAndTest(@PathVariable String id){
+
+        ProjectDTO projectDTO = projectServiceI.developAndTest(id);
+        //Convertimos a Generic
+        GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Updating successfully", projectDTO);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(genericDTO);
+    }
+
+    @PatchMapping("/projects/toprod/{id}")
+    public ResponseEntity<GenericDTO<ProjectDTO>> testAndProd(@PathVariable String id){
+
+        ProjectDTO projectDTO = projectServiceI.testAndProd(id);
+        //Convertimos a Generic
+        GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Updating successfully", projectDTO);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(genericDTO);
     }
 }

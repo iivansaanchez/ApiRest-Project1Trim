@@ -8,5 +8,5 @@ public interface DeveloperServiceI {
     void saveDeveloper(Developers developers);
 
     //Función para eliminar desarrolladro de la BBDD
-    void deleteDeveloper(String id);
+    void deleteDeveloper(Integer id);
 }

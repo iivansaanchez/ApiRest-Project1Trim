@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import com.vedruna.project.dto.ProjectDTO;
+import com.vedruna.project.persistance.models.Status;
 import com.vedruna.project.exception.ExceptionElementNotFound;
 import com.vedruna.project.exception.ExceptionValueNotRight;
 import com.vedruna.project.persistance.models.Project;
 import com.vedruna.project.persistance.repository.ProjectRepository;
+import com.vedruna.project.persistance.repository.StatusRepository;
 
 @Service
 public class ProjectServiceImp implements ProjectServiceI {
@@ -22,6 +24,9 @@ public class ProjectServiceImp implements ProjectServiceI {
     // Se utiliza ProjectRepository para realizar las operaciones básicas proporcionadas por JpaRepository.
     @Autowired
     ProjectRepository projectRepository;
+
+    @Autowired
+    StatusRepository statusRepository;
     /**
      * Función para obtener todos projectos paginados
      * 
@@ -151,8 +156,13 @@ public class ProjectServiceImp implements ProjectServiceI {
      * @param id El ID del proyecto que se desea eliminar.
      */
     @Override
-    public void deleteProduct(String id) {
-    
+    public void deleteProject(Integer id) {
+        // Eliminar el proyecto si existe
+        projectRepository.deleteById(id);
+    }
+
+    @Override
+    public ProjectDTO developAndTest(String id) {
         // Validación inicial de id
         if (id == null || id.trim().isEmpty()) {
             throw new ExceptionValueNotRight("Id cannot be null or empty");
@@ -169,12 +179,83 @@ public class ProjectServiceImp implements ProjectServiceI {
         if (idValid <= 0) {
             throw new ExceptionValueNotRight("Id cannot be negative or zero");
         }
-    
-        // Verificar si el proyecto existe
+
+        // Buscar el proyecto existente por ID
         Project existingProject = projectRepository.findById(idValid)
+            .orElseThrow(() -> new ExceptionElementNotFound(idValid));
+
+        // Buscar el estado de "Testing"
+        Status testingStatus = statusRepository.findById(2)
+            .orElseThrow(() -> new ExceptionValueNotRight("Testing status not found"));
+
+        try {
+            // Verificar si ya está en estado "Testing"
+            if (existingProject.getStatus().getId() != 2) {
+                // Cambiar el estado del proyecto a "Testing"
+                existingProject.setStatus(testingStatus);
+
+                // Guardar los cambios
+                projectRepository.save(existingProject);
+
+                // Devolver el DTO
+                return new ProjectDTO(existingProject);
+            } else {
+                throw new ExceptionValueNotRight("Cannot move project to Testing. It is already in Testing.");
+            }
+        } catch (Exception e) {
+            throw new ExceptionValueNotRight(
+                "An unexpected error occurred while moving the project to Testing: " + e.getMessage()
+            );
+        }
+
+    }
+
+    @Override
+    public ProjectDTO testAndProd(String id) {
+               // Validación inicial de id
+               if (id == null || id.trim().isEmpty()) {
+                throw new ExceptionValueNotRight("Id cannot be null or empty");
+            }
+        
+            int idValid;
+            try {
+                idValid = Integer.parseInt(id);
+            } catch (NumberFormatException e) {
+                throw new ExceptionValueNotRight("Id must be a valid integer");
+            }
+        
+            // Validación de id negativo o cero
+            if (idValid <= 0) {
+                throw new ExceptionValueNotRight("Id cannot be negative or zero");
+            }
+    
+            // Buscar el proyecto existente por ID
+            Project existingProject = projectRepository.findById(idValid)
                 .orElseThrow(() -> new ExceptionElementNotFound(idValid));
     
-        // Eliminar el proyecto si existe
-        projectRepository.deleteById(existingProject.getId());
+            // Buscar el estado de "Production"
+            Status testingStatus = statusRepository.findById(3)
+                .orElseThrow(() -> new ExceptionValueNotRight("Production status not found"));
+    
+            try {
+                // Verificar si ya está en estado "Production"
+                if (existingProject.getStatus().getId() != 3) {
+                    // Cambiar el estado del proyecto a "Production"
+                    existingProject.setStatus(testingStatus);
+    
+                    // Guardar los cambios
+                    projectRepository.save(existingProject);
+    
+                    // Devolver el DTO
+                    return new ProjectDTO(existingProject);
+                } else {
+                    throw new ExceptionValueNotRight("Cannot move project to Production. It is already in Production.");
+                }
+            } catch (Exception e) {
+                throw new ExceptionValueNotRight(
+                    "An unexpected error occurred while moving the project to Production: " + e.getMessage()
+                );
+            }
     }
+
 }

@@ -8,6 +8,6 @@ public interface TecnologiesServiceI {
     void saveTechnologies(Technologies technologies);
 
     //Funcion para eliminar tecnologia
-    void deleteTechnologies(String id);
+    void deleteTechnologies(Integer id);
     
 } 

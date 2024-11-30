@@ -26,5 +26,11 @@ public interface ProjectServiceI {
     void updateProject(String id, Project project);
 
     //Función borrar project por su id
-    void deleteProduct(String id);
+    void deleteProject(Integer id);
+
+    //Funcion para pasar de develop a test
+    ProjectDTO developAndTest(String id);
+
+    //Funcion para pasar de test a prod
+    ProjectDTO testAndProd(String id);
 }
