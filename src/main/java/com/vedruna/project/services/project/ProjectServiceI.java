@@ -33,4 +33,14 @@ public interface ProjectServiceI {
 
     //Funcion para pasar de test a prod
     ProjectDTO testAndProd(String id);
+
+    //Funcion para añadir una tecnologia a un proyecto
+    ProjectDTO addTechnologyToProject(String id, Integer technologyId);
+
+    //Funcion para añadir un desarrollador a un proyecto
+    ProjectDTO addDeveloperToProject(String id, Integer developerId);
+
+    //Funcion para obtener los proyectos por una tecnologia
+    List<ProjectDTO> getProjectByNameTechnologies(String technology);
+
 }

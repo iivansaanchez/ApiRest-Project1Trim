@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vedruna.project.dto.DevelopersDTO;
 import com.vedruna.project.dto.GenericDTO;
 import com.vedruna.project.dto.ProjectDTO;
+import com.vedruna.project.dto.TechnologiesDTO;
 import com.vedruna.project.exception.ExceptionElementNotFound;
 import com.vedruna.project.exception.ExceptionPageNotFound;
 import com.vedruna.project.exception.ExceptionValueNotRight;
@@ -205,5 +207,27 @@ public class ProjectController {
         GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Updating successfully", projectDTO);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(genericDTO);
+    }
+
+    @PostMapping("/technologies/used/{id}")
+    public ResponseEntity<GenericDTO<ProjectDTO>> addTechnologyToProject(
+            @PathVariable String id, @RequestBody TechnologiesDTO technologiesDTO) {
+        ProjectDTO updatedProject = projectServiceI.addTechnologyToProject(id, technologiesDTO.getId());
+        GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Updating successfully", updatedProject);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(genericDTO);
+    }
+
+    @PostMapping("/developers/worked/{id}")
+    public ResponseEntity<GenericDTO<ProjectDTO>> addDeveloperToProject(
+            @PathVariable String id, @RequestBody DevelopersDTO developersDTO) {
+        ProjectDTO updatedProject = projectServiceI.addDeveloperToProject(id, developersDTO.getId());
+        GenericDTO<ProjectDTO> genericDTO = new GenericDTO<ProjectDTO>("Updating successfully", updatedProject);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(genericDTO);
+    }
+
+    @GetMapping("/projects/tec/{tech}")
+    public ResponseEntity<GenericDTO<List<ProjectDTO>>> getProjectsByTechnology(@PathVariable String tech) {
+        List<ProjectDTO> projects = projectServiceI.getProjectByNameTechnologies(tech);
+        return ResponseEntity.ok(new GenericDTO<>("Projects fetched successfully", projects));
     }
 }
